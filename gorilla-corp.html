@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gorilla Corp — Ghost Reactor Operations</title>
+<link rel="icon" href="gcorp.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Archivo+Black&display=swap" rel="stylesheet">
+<style>
+  /* ===== CUSTOM FONT =====
+     Drop your font file next to this HTML file and name it font.otf or font.ttf.
+     Both are listed, so whichever one you have will be used. If neither is
+     present the page falls back to Archivo without breaking. */
+  @font-face{
+    font-family:"GCorp";
+    src:url("font.otf") format("opentype"),
+        url("font.ttf") format("truetype");
+    font-display:swap;
+  }
+
+  :root{
+    --void:#07050C;
+    --pit:#0E0918;
+    --panel:#160E26;
+    --edge:#2E1B4D;
+    --violet:#7B2FF7;
+    --glow:#B98CFF;
+    --ecto:#D9C4FF;
+    --ink:#EFE9F8;
+    --dim:#9B8BB8;
+    --display:"GCorp","Archivo Black",Impact,sans-serif;
+    --body:"Archivo","Helvetica Neue",Arial,sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;background:var(--void);color:var(--ink);
+    font-family:var(--body);font-size:17px;line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:var(--display);font-weight:400;line-height:1.02;margin:0;letter-spacing:-.01em;}
+  p{max-width:64ch;}
+  a{color:var(--glow);}
+  .wrap{max-width:1140px;margin:0 auto;padding:0 24px;}
+
+  /* ---------- header ---------- */
+  header.top{border-bottom:1px solid var(--edge);background:rgba(7,5,12,.92);position:sticky;top:0;z-index:20;backdrop-filter:blur(8px);}
+  header.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:18px;padding-top:14px;padding-bottom:14px;flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:11px;font-family:var(--display);font-size:19px;}
+  .brand img{height:34px;width:auto;display:block;}
+  .brand .fallback{
+    width:30px;height:30px;background:var(--violet);
+    clip-path:polygon(50% 0,100% 28%,100% 72%,50% 100%,0 72%,0 28%);
+  }
+  nav.main{display:flex;gap:22px;font-size:15px;font-weight:500;}
+  nav.main a{color:var(--dim);text-decoration:none;padding-bottom:3px;border-bottom:2px solid transparent;}
+  nav.main a:hover,nav.main a:focus-visible{color:var(--ink);border-bottom-color:var(--violet);}
+
+  /* ---------- hero ---------- */
+  .hero{border-bottom:1px solid var(--edge);
+    background:radial-gradient(120% 90% at 78% 8%,rgba(123,47,247,.28),transparent 62%),var(--void);}
+  .hero .wrap{display:grid;grid-template-columns:1.25fr .75fr;gap:56px;align-items:center;padding:78px 24px;}
+  .hero h1{font-size:clamp(42px,7vw,80px);}
+  .hero .sub{font-size:20px;color:var(--dim);margin-top:22px;max-width:44ch;}
+  .stamp{display:inline-block;margin-bottom:24px;padding:6px 13px;border:1px solid var(--violet);
+    color:var(--glow);font-size:13.5px;font-weight:600;letter-spacing:.03em;}
+  .cta-row{display:flex;gap:14px;margin-top:34px;flex-wrap:wrap;}
+  .btn{display:inline-block;padding:14px 24px;background:var(--violet);color:#fff;border:1px solid var(--violet);
+    font-family:var(--display);font-size:15px;text-decoration:none;cursor:pointer;}
+  .btn:hover{background:#8F45FF;}
+  .btn.line{background:transparent;color:var(--ecto);border-color:var(--edge);}
+  .btn.line:hover{border-color:var(--violet);background:rgba(123,47,247,.12);}
+
+  /* ---------- depth gauge ---------- */
+  .gauge{border:1px solid var(--edge);background:var(--pit);padding:18px;}
+  .gauge-head{font-size:13px;color:var(--dim);font-weight:600;margin-bottom:14px;}
+  .gauge-track{position:relative;padding-left:14px;border-left:2px solid var(--edge);}
+  .depth-btn{display:block;width:100%;text-align:left;background:none;border:0;color:var(--dim);
+    font-family:var(--body);font-size:14.5px;padding:7px 6px;cursor:pointer;position:relative;}
+  .depth-btn::before{content:"";position:absolute;left:-21px;top:50%;width:9px;height:9px;
+    margin-top:-4px;background:var(--edge);border-radius:50%;}
+  .depth-btn:hover{color:var(--ink);}
+  .depth-btn[aria-pressed="true"]{color:var(--ink);font-weight:600;}
+  .depth-btn[aria-pressed="true"]::before{background:var(--glow);box-shadow:0 0 0 4px rgba(185,140,255,.2);}
+  .depth-out{margin-top:16px;border-top:1px solid var(--edge);padding-top:14px;font-size:15px;color:var(--ecto);min-height:74px;}
+  .drop-anim{animation:drop .9s ease-out 1;}
+  @keyframes drop{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.drop-anim{animation:none;}}
+
+  /* ---------- sections ---------- */
+  section{border-bottom:1px solid var(--edge);}
+  .band{padding:72px 0;}
+  .band h2{font-size:clamp(28px,4.2vw,42px);max-width:22ch;}
+  .lede{margin-top:18px;font-size:19px;color:var(--dim);}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:start;}
+
+  /* ---------- shift steps ---------- */
+  .steps{counter-reset:s;margin:38px 0 0;padding:0;list-style:none;display:grid;gap:0;}
+  .steps li{counter-increment:s;display:grid;grid-template-columns:56px 1fr;gap:20px;
+    padding:22px 0;border-top:1px solid var(--edge);}
+  .steps li:last-child{border-bottom:1px solid var(--edge);}
+  .steps li::before{content:counter(s);font-family:var(--display);font-size:30px;color:var(--violet);line-height:1;}
+  .steps h3{font-size:20px;margin-bottom:6px;}
+  .steps p{margin:0;font-size:16px;color:var(--dim);}
+
+  /* ---------- gear + roster cards ---------- */
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:38px;background:var(--edge);border:1px solid var(--edge);}
+  .cell{background:var(--pit);padding:24px;}
+  .cell h3{font-size:19px;margin-bottom:8px;}
+  .cell p{margin:0;font-size:15px;color:var(--dim);}
+  .tag{display:inline-block;margin-top:14px;font-size:12px;font-weight:600;letter-spacing:.04em;
+    padding:3px 9px;border:1px solid var(--violet);color:var(--glow);}
+  .tag.warn{border-color:var(--ecto);color:var(--ecto);}
+
+  .roster{background:var(--pit);}
+  .roster .cell{background:var(--panel);}
+
+  /* ---------- find list ---------- */
+  .finds{margin:38px 0 0;padding:0;list-style:none;}
+  .finds li{border-top:1px solid var(--edge);padding:20px 0;display:grid;grid-template-columns:170px 1fr;gap:24px;}
+  .finds li:last-child{border-bottom:1px solid var(--edge);}
+  .finds h3{font-size:18px;}
+  .finds .where{font-size:14px;color:var(--glow);font-weight:600;margin-top:5px;}
+  .finds p{margin:0;font-size:15.5px;color:var(--dim);}
+
+  /* ---------- badge ---------- */
+  .assign{background:var(--pit);}
+  .form{margin-top:28px;display:flex;gap:12px;flex-wrap:wrap;max-width:640px;}
+  .form input{flex:1 1 250px;padding:14px;background:var(--void);border:1px solid var(--edge);
+    color:var(--ink);font-family:var(--body);font-size:16px;}
+  .form input::placeholder{color:#6D5C8A;}
+  .form input:focus-visible,.btn:focus-visible,.depth-btn:focus-visible,nav.main a:focus-visible{
+    outline:2px solid var(--glow);outline-offset:3px;}
+  .badge{margin-top:32px;max-width:440px;border:1px solid var(--violet);background:var(--panel);display:none;}
+  .badge.on{display:block;}
+  .badge-top{background:var(--violet);color:#fff;padding:11px 18px;font-family:var(--display);font-size:13.5px;
+    display:flex;justify-content:space-between;align-items:center;gap:10px;}
+  .badge-top img{height:20px;width:auto;}
+  .badge-body{padding:20px;display:grid;grid-template-columns:70px 1fr;gap:18px;}
+  .chip{width:70px;height:70px;border:1px solid var(--edge);}
+  .badge-name{font-family:var(--display);font-size:22px;word-break:break-word;line-height:1.06;}
+  .badge dl{margin:12px 0 0;display:grid;grid-template-columns:auto 1fr;gap:5px 14px;font-size:14.5px;}
+  .badge dt{color:var(--dim);margin:0;}
+  .badge dd{margin:0;}
+
+  /* ---------- footer ---------- */
+  footer{background:var(--void);}
+  footer .wrap{padding:48px 24px;}
+  footer p{font-size:14.5px;color:var(--dim);max-width:74ch;}
+  .fine{margin-top:20px;padding-top:18px;border-top:1px solid var(--edge);font-size:13.5px;}
+
+  @media (max-width:900px){
+    .hero .wrap{grid-template-columns:1fr;gap:40px;padding:48px 24px;}
+    .two{grid-template-columns:1fr;gap:34px;}
+    .grid3{grid-template-columns:1fr;}
+    .finds li{grid-template-columns:1fr;gap:8px;}
+    nav.main{gap:15px;font-size:14px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <img src="gcorp.png" alt="Gorilla Corp" onerror="this.remove();document.getElementById('mk').style.display='block'">
+      <span class="fallback" id="mk" style="display:none"></span>
+      GORILLA CORP
+    </div>
+    <nav class="main">
+      <a href="#reactor">The Reactor</a>
+      <a href="#shift">Your shift</a>
+      <a href="#gear">Gear</a>
+      <a href="#ghosts">Ghosts</a>
+      <a href="#find">Things to find</a>
+      <a href="#assign">Clock in</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <span class="stamp">Mines beneath the Stump — now hiring</span>
+      <h1>Clock in. Go down. Come back up.</h1>
+      <p class="sub">The Ghost Reactor is Gorilla Corp's mining operation under the Stump. You take a shift, clear the ghosts, collect their cores, and feed the drill so it can dig deeper. The layout changes every run, so nobody gets a map.</p>
+      <div class="cta-row">
+        <a class="btn" href="#assign">Get your assignment</a>
+        <a class="btn line" href="#find">See what's hidden</a>
+      </div>
+    </div>
+
+    <div class="gauge">
+      <div class="gauge-head">Drill depth log — tap a marker</div>
+      <div class="gauge-track">
+        <button class="depth-btn" type="button" data-d="0" aria-pressed="false">0 m — Drill hub</button>
+        <button class="depth-btn" type="button" data-d="1000" aria-pressed="false">1,000 m — first zones</button>
+        <button class="depth-btn" type="button" data-d="4000" aria-pressed="false">4,000 m — Monkeye</button>
+        <button class="depth-btn" type="button" data-d="5000" aria-pressed="false">5,000 m — Meteor Monster</button>
+        <button class="depth-btn" type="button" data-d="10000" aria-pressed="false">10,000 m — Fake Forest</button>
+        <button class="depth-btn" type="button" data-d="11000" aria-pressed="false">11,000 m — second boss</button>
+        <button class="depth-btn" type="button" data-d="30000" aria-pressed="false">30,000 m — deep run</button>
+        <button class="depth-btn" type="button" data-d="31000" aria-pressed="false">31,000 m — the floor</button>
+      </div>
+      <div class="depth-out" id="depthOut">Pick a depth to see what is waiting there.</div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="reactor">
+  <div class="wrap two">
+    <div>
+      <h2>What the Ghost Reactor actually is</h2>
+      <p class="lede">A co-op mode where you and your squad are employees, not players.</p>
+      <p>Another Axiom launched it on 2 May 2025 and rebuilt it on 17 October 2025. It sits deep in the Mines and replaced the old Deep Mines area. You arrive in a hub full of machines, posters and doors, then take an elevator down into the job.</p>
+      <p>It is a roguelike, so the mine rearranges itself every shift. You never learn a route, only how to read a room quickly. You can bring a squad or take a shift solo if you want it harder.</p>
+    </div>
+    <div>
+      <h2>Pay and paperwork</h2>
+      <p class="lede">Three separate things get counted, and people mix them up constantly.</p>
+      <p><strong>Cores</strong> are what ghosts drop. They power the drill and can be turned into credits. <strong>Credits</strong> buy your gear from the TOOL-O-MATIC during a shift. <strong>Shiny rocks</strong> are the normal Gorilla Tag currency, and they buy the permanent upgrades like personal drop pods that put you straight onto lower levels.</p>
+      <p>Cores also come out of crates and off the plants growing in the tunnels, so look at the walls, not just at the ghosts.</p>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="shift">
+  <div class="wrap">
+    <h2>How one shift runs</h2>
+    <p class="lede">Same four beats every time, however deep you get.</p>
+    <ol class="steps">
+      <li>
+        <div><h3>Gear up at the hub</h3>
+        <p>The drill floor has the TOOL-O-MATIC 2.0, the Recycler, the Career Hub and the Juice-O-Matic. Spend before you drop, because the elevator does not wait for you.</p></div>
+      </li>
+      <li>
+        <div><h3>Clear the zone</h3>
+        <p>Ghosts patrol until they notice you. Banish them with the baton, blind them with the flash, then pick the cores up off the floor before something else does.</p></div>
+      </li>
+      <li>
+        <div><h3>Hit the quota</h3>
+        <p>The drill needs a set number of cores before it moves. Everyone's haul counts toward the same total, so a squad that splits up and sweeps beats a squad that sticks together.</p></div>
+      </li>
+      <li>
+        <div><h3>Ride it down</h3>
+        <p>Quota met, the drill digs and the next zone opens a thousand metres lower. Deeper zones pay better and hit harder. Repeat until the shift ends or the shift ends you.</p></div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="band" id="gear">
+  <div class="wrap">
+    <h2>Standard issue equipment</h2>
+    <p class="lede">Company policy is that all of this is perfectly safe.</p>
+    <div class="grid3">
+      <div class="cell">
+        <h3>Charged Baton</h3>
+        <p>Your main tool. Hit a ghost with it and the ghost becomes a spectral core you can carry. Needs recharging, which is what collectors are for.</p>
+        <span class="tag">Melee</span>
+      </div>
+      <div class="cell">
+        <h3>Spectral Flash</h3>
+        <p>A burst of light that deals with ghosts you would rather not get close to. Good for clearing a doorway you are about to run through.</p>
+        <span class="tag">Ranged</span>
+      </div>
+      <div class="cell">
+        <h3>Collector</h3>
+        <p>Hoovers up cores, stores them as energy, and recharges your other gear. Also powers lamps and doors, and cores can be passed between collectors.</p>
+        <span class="tag">Support</span>
+      </div>
+      <div class="cell">
+        <h3>Shield Gun</h3>
+        <p>The recommended pick for boss fights. Keep it up during the Monkeye and you can survive attacks that would otherwise end the run.</p>
+        <span class="tag">Defence</span>
+      </div>
+      <div class="cell">
+        <h3>Personal Drop Pod</h3>
+        <p>Bought with shiny rocks and parked beside the main pod. Drops you straight to lower levels, and upgrades with juice to go deeper still.</p>
+        <span class="tag">Upgrade</span>
+      </div>
+      <div class="cell">
+        <h3>Juice</h3>
+        <p>The upgrade resource. Cheap next to a full kit, but it is what turns a drop pod from a shortcut into a serious head start.</p>
+        <span class="tag">Resource</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band roster" id="ghosts">
+  <div class="wrap">
+    <h2>Known personnel hazards</h2>
+    <p class="lede">Five base types, plus the two things management does not call ghosts.</p>
+    <div class="grid3">
+      <div class="cell">
+        <h3>Crawler</h3>
+        <p>Dark purple, skeletal, glowing white eyes, nothing below the waist. Patrols until it sees you, then holds still, winds up, and pounces. Drops a core every time.</p>
+        <span class="tag">Common</span>
+      </div>
+      <div class="cell">
+        <h3>Pest</h3>
+        <p>Bug-shaped and fast. There are armoured ones, huge ones worth up to three cores, and an enraged version in the deeper zones that attacks alarmingly quickly.</p>
+        <span class="tag">Common</span>
+      </div>
+      <div class="cell">
+        <h3>Lobber</h3>
+        <p>Skeletal like a crawler but it throws instead of pouncing. Fight it from behind cover rather than out in the open.</p>
+        <span class="tag">Ranged</span>
+      </div>
+      <div class="cell">
+        <h3>Summoner</h3>
+        <p>The one to kill first. Leave it alone and the room refills faster than your squad can clear it.</p>
+        <span class="tag">Priority</span>
+      </div>
+      <div class="cell">
+        <h3>Phantom</h3>
+        <p>A miner with a skeletal head, a pickaxe for one arm and a drill for the other. Only one per zone, drops nothing, and cannot be killed. It screams and chases. Leave.</p>
+        <span class="tag warn">Do not engage</span>
+      </div>
+      <div class="cell">
+        <h3>Monkeye</h3>
+        <p>First boss, at 4,000 m. Escaped from the Basement. Fires lasers, slams the ground, and spins with every laser on. Gains 20% more health for each extra monke in the lobby.</p>
+        <span class="tag warn">Boss</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="find">
+  <div class="wrap">
+    <h2>Things you can actually try to find</h2>
+    <p class="lede">None of this is guaranteed in a given shift. That is the point of looking.</p>
+    <ul class="finds">
+      <li>
+        <div><h3>The Fake Forest</h3><div class="where">10,000 / 15,000 / 20,000 / 25,000 m</div></div>
+        <p>A zone that has a chance to appear at those depths, once per run at most. It is dressed as the Forest, but faceless monkes stand around watching you and the leaderboard prints messages instead of scores. A phantom is usually tucked near the corner, left of the reactor entrance.</p>
+      </li>
+      <li>
+        <div><h3>The Bayou leaderboard</h3><div class="where">Bayou zone</div></div>
+        <p>It used to list everyone in the lobby. Now it tells you that you are not supposed to be here, the same line the Fake Forest gives you.</p>
+      </li>
+      <li>
+        <div><h3>Riding the Monkeye</h3><div class="where">4,000 m</div></div>
+        <p>If you die in the fight you are not out of the fight. Climb onto the boss and go along for the ride while your squad finishes it.</p>
+      </li>
+      <li>
+        <div><h3>The Meteor Monster</h3><div class="where">5,000 / 11,000 / 30,000 m</div></div>
+        <p>It entered orbit in October 2025 and crash-landed in a live event in January 2026. It has eye tentacles like the Monkeye but it is a separate thing. Its wake-up cutscene music opens like the track Curse Of The Monkeye.</p>
+      </li>
+      <li>
+        <div><h3>The bottom of the map</h3><div class="where">31,000 m</div></div>
+        <p>The drill stops here. Meet quota at the floor and it lifts back to 30,000 m and digs down again, so there is no thirty-two. Getting here at all is the flex.</p>
+      </li>
+      <li>
+        <div><h3>Halloween staffing</h3><div class="where">Seasonal</div></div>
+        <p>Lucy turns up in the Reactor during Halloween and does not follow ghost rules. She can lift you while a ghost is next to you, which is as bad as it sounds.</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section class="band assign" id="assign">
+  <div class="wrap">
+    <h2>Clock in</h2>
+    <p class="lede">Type a name and the roster assigns you a post, a loadout and a starting depth. The same name always gets the same assignment, so compare with your squad.</p>
+    <div class="form">
+      <label for="nameInput" style="position:absolute;left:-9999px;">Your name</label>
+      <input id="nameInput" type="text" maxlength="20" placeholder="Name on your badge" autocomplete="off">
+      <button class="btn" id="issueBtn" type="button">Issue badge</button>
+    </div>
+
+    <div class="badge" id="badge">
+      <div class="badge-top">
+        <span>GORILLA CORP — SHIFT ID</span>
+        <img src="gcorp.png" alt="" onerror="this.remove()">
+      </div>
+      <div class="badge-body">
+        <div class="chip" id="chip"></div>
+        <div>
+          <div class="badge-name" id="bName">—</div>
+          <dl>
+            <dt>Staff no.</dt><dd id="bId">—</dd>
+            <dt>Post</dt><dd id="bPost">—</dd>
+            <dt>Loadout</dt><dd id="bGear">—</dd>
+            <dt>Drop depth</dt><dd id="bDepth">—</dd>
+            <dt>Shift</dt><dd id="bShift">—</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="brand" style="margin-bottom:16px;">
+      <img src="gcorp.png" alt="Gorilla Corp" onerror="this.remove()">
+      GORILLA CORP
+    </div>
+    <p>Everything on this page describes real Ghost Reactor content in Gorilla Tag, drawn from Another Axiom's own announcements and the community wiki. The game updates often, so treat depths and drop rates as a guide rather than gospel.</p>
+    <div class="fine">
+      <p>Unofficial fan site. Not affiliated with, endorsed by, or connected to Another Axiom or Gorilla Tag. Made by a player, for players.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  /* ---- depth gauge ---- */
+  var DEPTHS = {
+    "0":"Drill hub. TOOL-O-MATIC 2.0, Recycler, Career Hub and Juice-O-Matic, plus the main drop pod and any personal pods you own. Spend your credits here.",
+    "1000":"Opening zones. Crawlers and pests on patrol, cores on the plants and in the crates. Quiet enough to learn the gear on.",
+    "4000":"Monkeye. The first real boss, escaped from the Basement. Lasers, ground slams and a spin attack. Bring a shield gun and a collector to keep it charged.",
+    "5000":"First Meteor Monster fight. Boss shifts run longer than standard ones, so pace yourself.",
+    "10000":"First chance for the Fake Forest to spawn. Faceless monkes, a leaderboard that talks back, and a phantom near the corner.",
+    "11000":"Meteor Monster returns. By now enraged pests are in the mix and rooms fill up much faster.",
+    "30000":"Deep run territory. Third Meteor Monster fight and the last stretch before the floor.",
+    "31000":"The drill's limit. Hit quota here and it lifts back to 30,000 m and digs down again. There is nothing below this."
+  };
+  var out = document.getElementById('depthOut');
+  var btns = document.querySelectorAll('.depth-btn');
+  btns.forEach(function(b){
+    b.addEventListener('click', function(){
+      btns.forEach(function(o){o.setAttribute('aria-pressed','false');});
+      b.setAttribute('aria-pressed','true');
+      out.textContent = DEPTHS[b.dataset.d];
+      out.classList.remove('drop-anim');
+      void out.offsetWidth;
+      out.classList.add('drop-anim');
+    });
+  });
+
+  /* ---- badge generator ---- */
+  var POSTS = ['Core collection','Drill maintenance','Zone sweep','Boss support','Salvage & recycling','Night rota'];
+  var GEAR = ['Baton + collector','Flash + shield gun','Double baton','Shield gun + collector','Flash + collector','Full kit'];
+  var START = ['0 m','1,000 m','4,000 m','5,000 m','10,000 m','11,000 m'];
+  var SHIFT = ['Standard','Extended','Boss rota','Solo','Squad of four'];
+  var CHIPS = ['#7B2FF7','#B98CFF','#4B1F8C','#D9C4FF','#2E1B4D','#8F45FF'];
+
+  function hash(s){var h=7;for(var i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))%100000;}return h;}
+
+  function issue(){
+    var raw = document.getElementById('nameInput').value.trim();
+    if(!raw){document.getElementById('nameInput').focus();return;}
+    var h = hash(raw.toLowerCase());
+    document.getElementById('bName').textContent = raw;
+    document.getElementById('bId').textContent = 'GC-' + (1000 + (h % 8999));
+    document.getElementById('bPost').textContent = POSTS[h % POSTS.length];
+    document.getElementById('bGear').textContent = GEAR[(h >> 2) % GEAR.length];
+    document.getElementById('bDepth').textContent = START[(h >> 3) % START.length];
+    document.getElementById('bShift').textContent = SHIFT[(h >> 4) % SHIFT.length];
+    document.getElementById('chip').style.background = CHIPS[(h >> 5) % CHIPS.length];
+    document.getElementById('badge').classList.add('on');
+  }
+  document.getElementById('issueBtn').addEventListener('click', issue);
+  document.getElementById('nameInput').addEventListener('keydown', function(e){
+    if(e.key === 'Enter') issue();
+  });
+</script>
+</body>
+</html>
